@@ -1,0 +1,63 @@
+{
+  "taxYears": {
+    "2024-25": {
+      "year": "2024-25",
+      "effectiveFrom": "2024-07-01",
+      "effectiveTo": "2025-06-30",
+      "brackets": [
+        {
+          "min": 0,
+          "max": 18200,
+          "rate": 0,
+          "fixedAmount": 0,
+          "description": "Tax-free threshold"
+        },
+        {
+          "min": 18201,
+          "max": 45000,
+          "rate": 0.19,
+          "fixedAmount": 0,
+          "description": "19% tax rate"
+        },
+        {
+          "min": 45001,
+          "max": 120000,
+          "rate": 0.325,
+          "fixedAmount": 5092,
+          "description": "32.5% tax rate"
+        },
+        {
+          "min": 120001,
+          "max": 180000,
+          "rate": 0.37,
+          "fixedAmount": 29467,
+          "description": "37% tax rate"
+        },
+        {
+          "min": 180001,
+          "max": null,
+          "rate": 0.45,
+          "fixedAmount": 51667,
+          "description": "45% tax rate"
+        }
+      ],
+      "medicareLevy": 0.02,
+      "medicareLevySurcharge": {
+        "thresholds": {
+          "single": 93000,
+          "family": 186000
+        },
+        "rates": [0.01, 0.0125, 0.015]
+      },
+      "lastUpdated": "2024-07-01T00:00:00Z",
+      "source": "Australian Taxation Office",
+      "sourceUrl": "https://www.ato.gov.au/rates-and-thresholds"
+    }
+  },
+  "meta": {
+    "version": "1.0.0",
+    "lastModified": "2024-12-23T00:00:00Z",
+    "updateInstructions": "Update this file annually after federal budget or ATO rate announcements",
+    "maintainer": "Capital Gains Calculator App"
+  }
+}

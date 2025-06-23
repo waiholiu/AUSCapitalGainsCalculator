@@ -1,0 +1,202 @@
+<div class="card">
+  <h2>Capital Gains Calculator</h2>
+    <form [formGroup]="calculatorForm">
+    <div class="form-group">
+      <label for="buyPrice">Purchase Price (AUD)</label>
+      <div class="currency">
+        <input 
+          type="number" 
+          id="buyPrice" 
+          formControlName="buyPrice"
+          placeholder="Enter the price you bought the asset for"
+          step="0.01"
+          min="0">
+      </div>
+      <div *ngIf="calculatorForm.get('buyPrice')?.invalid && calculatorForm.get('buyPrice')?.touched" 
+           class="error-message">
+        Please enter a valid purchase price.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="salePrice">Sale Price (AUD)</label>
+      <div class="currency">
+        <input 
+          type="number" 
+          id="salePrice" 
+          formControlName="salePrice"
+          placeholder="Enter the price you sold the asset for"
+          step="0.01"
+          min="0">
+      </div>
+      <div *ngIf="calculatorForm.get('salePrice')?.invalid && calculatorForm.get('salePrice')?.touched" 
+           class="error-message">
+        Please enter a valid sale price.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="currentIncome">Your Current Annual Income (AUD) <span class="recommended">- Recommended</span></label>
+      <div class="currency">
+        <input 
+          type="number" 
+          id="currentIncome" 
+          formControlName="currentIncome"
+          placeholder="Enter your current annual income for tax comparison"
+          step="1"
+          min="0">
+      </div>
+      <small class="help-text">📊 Enter your income to see exactly how capital gains will affect your tax bill</small>
+    </div>
+
+    <button 
+      type="button" 
+      class="btn btn-secondary" 
+      (click)="reset()"
+      *ngIf="showResults">
+      Reset Calculator
+    </button>
+  </form>
+
+  <div *ngIf="showResults && results" class="results">
+    <h3>Calculation Results</h3>
+    
+    <div class="result-item">
+      <span class="result-label">Purchase Price:</span>
+      <span class="result-value">{{ formatCurrency(calculatorForm.get('buyPrice')?.value) }}</span>
+    </div>
+    
+    <div class="result-item">
+      <span class="result-label">Sale Price:</span>
+      <span class="result-value">{{ formatCurrency(calculatorForm.get('salePrice')?.value) }}</span>
+    </div>
+    
+    <div class="result-item">
+      <span class="result-label">Capital {{ isGain() ? 'Gain' : 'Loss' }}:</span>
+      <span class="result-value" [class.profit]="isGain()" [class.loss]="isLoss()">
+        {{ formatCurrency(results.capitalGain) }}
+      </span>
+    </div>
+    
+    <div class="result-item" *ngIf="isGain()">
+      <span class="result-label">After 50% CGT Discount:</span>
+      <span class="result-value profit">{{ formatCurrency(results.capitalGainAfterDiscount) }}</span>
+    </div>
+    
+    <div class="result-item" *ngIf="isGain()">
+      <span class="result-label">Your Share (50% ownership):</span>
+      <span class="result-value profit">{{ formatCurrency(results.spouseShare) }}</span>
+    </div>
+    
+    <div class="result-item" *ngIf="isLoss()">
+      <span class="result-label">Your Share (50% ownership):</span>
+      <span class="result-value loss">{{ formatCurrency(results.spouseShare) }}</span>
+    </div>
+      <div class="result-item total">
+      <span class="result-label">Total Capital Gains {{ isGain() ? 'Liability' : 'Loss' }}:</span>
+      <span class="result-value" [class.profit]="isGain()" [class.loss]="isLoss()">
+        {{ formatCurrency(results.totalCapitalGainsBill) }}
+      </span>
+    </div>    <!-- Tax Calculations -->
+    <div *ngIf="isGain()" class="tax-estimates">
+      <h4>Tax Impact Analysis</h4>
+      
+      <div class="tax-comparison">
+        <h5>Your Tax Comparison:</h5>
+        
+        <div class="comparison-grid">
+          <div class="comparison-item without-cg">
+            <h6>Without Capital Gains</h6>
+            <div class="tax-detail">
+              <span class="income-label">Taxable Income:</span>
+              <span class="income-value">{{ formatCurrency(results.currentIncome!) }}</span>
+            </div>
+            <div class="tax-detail">
+              <span class="tax-label">Annual Tax:</span>
+              <span class="tax-value">{{ formatCurrency(results.taxWithoutCG!) }}</span>
+            </div>
+          </div>
+          
+          <div class="comparison-item with-cg">
+            <h6>With Capital Gains</h6>
+            <div class="tax-detail">
+              <span class="income-label">Taxable Income:</span>
+              <span class="income-value">{{ formatCurrency(results.currentIncome! + results.totalCapitalGainsBill) }}</span>
+            </div>
+            <div class="tax-detail">
+              <span class="tax-label">Annual Tax:</span>
+              <span class="tax-value highlight-tax">{{ formatCurrency(results.taxWithCG!) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tax-impact-summary">
+          <div class="result-item highlight">
+            <span class="result-label">Tax Due to Capital Gains:</span>
+            <span class="result-value tax-amount">{{ formatCurrency(results.actualAdditionalTax!) }}</span>
+          </div>
+          
+          <div class="result-item" *ngIf="results.taxWithoutCG! > 0">
+            <span class="result-label">Tax Increase Percentage:</span>
+            <span class="result-value percentage">{{ results.totalTaxIncrease!.toFixed(1) }}%</span>
+          </div>
+          
+          <div class="result-item" *ngIf="results.taxWithoutCG! === 0">
+            <span class="result-label">Your Tax Burden:</span>
+            <span class="result-value tax-amount">{{ formatCurrency(results.taxWithCG!) }} (from $0 to this amount)</span>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="results.currentIncome === 0" class="zero-income-note">
+        <p><strong>💡 Note:</strong> Since your current income is $0, all tax shown above is purely from capital gains.</p>
+        <p>Try entering different income amounts to see how capital gains interact with regular income tax brackets!</p>
+      </div>
+      
+      <div *ngIf="results.currentIncome! > 0" class="alternative-scenarios">
+        <h5>Alternative Income Scenarios:</h5>
+        <div class="mini-scenarios">
+          <div class="mini-scenario">
+            <span>$30k income:</span>
+            <span class="tax-amount">{{ formatCurrency(results.estimatedTaxLow) }} extra tax</span>
+          </div>
+          <div class="mini-scenario">
+            <span>$80k income:</span>
+            <span class="tax-amount">{{ formatCurrency(results.estimatedTaxMedium) }} extra tax</span>
+          </div>
+          <div class="mini-scenario">
+            <span>$150k income:</span>
+            <span class="tax-amount">{{ formatCurrency(results.estimatedTaxHigh) }} extra tax</span>
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="calculation-notes">
+      <h4>Calculation Notes:</h4>
+      <ul>
+        <li *ngIf="isGain()">50% CGT discount applied to capital gains (for assets held >12 months)</li>
+        <li>50% ownership split between spouses applied</li>
+        <li *ngIf="isGain()">Capital gains are added to your taxable income</li>
+        <li *ngIf="isGain()">Tax estimates use 2024-25 Australian tax brackets</li>
+        <li *ngIf="isLoss()">Capital losses can be used to offset future capital gains</li>
+        <li><strong>Medicare Levy:</strong> Additional 2% may apply (not included in estimates)</li>
+        <li><strong>Note:</strong> This is a simplified calculation. Consult a tax professional for accurate advice.</li>
+      </ul>
+        <div class="tax-brackets-info" *ngIf="isGain()">
+        <h5>Tax Information:</h5>
+        <div class="tax-year-info">
+          <p><strong>Tax Year:</strong> {{ getCurrentTaxYear() }}</p>
+          <p><strong>Data Last Updated:</strong> {{ getTaxBracketsLastUpdated() }}</p>
+        </div>
+        <h6>Current Tax Brackets:</h6>
+        <ul class="tax-brackets">
+          <li>$0 - $18,200: 0%</li>
+          <li>$18,201 - $45,000: 19%</li>
+          <li>$45,001 - $120,000: 32.5%</li>
+          <li>$120,001 - $180,000: 37%</li>
+          <li>$180,001+: 45%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
