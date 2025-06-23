@@ -780,6 +780,20 @@ h3 {
   }
 }
 
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.button-group .btn {
+  margin-top: 0;
+  margin-left: 0;
+  flex: 1;
+  min-width: 150px;
+}
+
 /* Individual Tax Analysis Styling */
 .individual-tax-analysis {
   margin-bottom: 15px;

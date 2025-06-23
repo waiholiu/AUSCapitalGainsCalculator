@@ -99,14 +99,16 @@ export class CalculatorComponent implements OnInit {
     // Try to fetch latest tax brackets on component load
     this.updateTaxBrackets();
     
-    // Load values from query parameters first
-    this.isLoadingFromQueryParams = true;
-    this.loadFromQueryParams();
-    this.isLoadingFromQueryParams = false;
-    
-    // Calculate initial results after loading query params
-    this.calculateCapitalGains();
-    this.showResults = true;
+    // Load values from query parameters first - use setTimeout to ensure form is ready
+    setTimeout(() => {
+      this.isLoadingFromQueryParams = true;
+      this.loadFromQueryParams();
+      this.isLoadingFromQueryParams = false;
+      
+      // Calculate initial results after loading query params
+      this.calculateCapitalGains();
+      this.showResults = true;
+    }, 0);
     
     // Subscribe to form changes for dynamic updates
     this.calculatorForm.valueChanges.subscribe(() => {
@@ -400,9 +402,9 @@ export class CalculatorComponent implements OnInit {
 
   getTaxBracketsLastUpdated(): string {
     return this.taxBracketsLastUpdated;
-  }
-  private loadFromQueryParams() {
+  }  private loadFromQueryParams() {
     const params = this.route.snapshot.queryParams;
+    console.log('Raw query params:', params);
     
     // Update form with query parameters if they exist
     const formValues: any = {};
@@ -411,28 +413,37 @@ export class CalculatorComponent implements OnInit {
     if (params['buyPrice'] && !isNaN(Number(params['buyPrice']))) {
       formValues.buyPrice = params['buyPrice'];
       hasParams = true;
+      console.log('Loading buyPrice:', params['buyPrice']);
     }
     if (params['salePrice'] && !isNaN(Number(params['salePrice']))) {
       formValues.salePrice = params['salePrice'];
       hasParams = true;
+      console.log('Loading salePrice:', params['salePrice']);
     }
     if (params['currentIncome'] && !isNaN(Number(params['currentIncome']))) {
       formValues.currentIncome = params['currentIncome'];
       hasParams = true;
+      console.log('Loading currentIncome:', params['currentIncome']);
     }
     if (params['hasSpouse'] !== undefined) {
       formValues.hasSpouse = params['hasSpouse'] === 'true';
       hasParams = true;
+      console.log('Loading hasSpouse:', params['hasSpouse']);
     }
     if (params['spouseIncome'] && !isNaN(Number(params['spouseIncome']))) {
       formValues.spouseIncome = params['spouseIncome'];
       hasParams = true;
+      console.log('Loading spouseIncome:', params['spouseIncome']);
     }
     
     // Only update if we have any valid query parameters
     if (hasParams) {
       console.log('Loading from query params:', formValues);
+      console.log('Form before patch:', this.calculatorForm.value);
       this.calculatorForm.patchValue(formValues);
+      console.log('Form after patch:', this.calculatorForm.value);
+    } else {
+      console.log('No valid query parameters found');
     }
   }
 

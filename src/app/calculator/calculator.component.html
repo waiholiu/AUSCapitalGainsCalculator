@@ -51,13 +51,15 @@
                     placeholder="Enter your spouse's current annual income" step="1" min="0">
             </div>
             <small class="help-text">💼 Your spouse's income for combined tax calculation</small>
-        </div>        <button type="button" class="btn btn-secondary" (click)="reset()" *ngIf="showResults">
-            Reset Calculator
-        </button>
-        
-        <button type="button" class="btn btn-primary" (click)="copyShareableUrl()" *ngIf="showResults">
-            📋 Copy Shareable URL
-        </button>
+        </div>        <div class="button-group" *ngIf="showResults">
+            <button type="button" class="btn btn-secondary" (click)="reset()">
+                Reset Calculator
+            </button>
+            
+            <button type="button" class="btn btn-primary" (click)="copyShareableUrl()">
+                📋 Copy Shareable URL
+            </button>
+        </div>
     </form>
 
     <div *ngIf="showResults && results" class="results">
