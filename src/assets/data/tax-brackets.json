@@ -1,9 +1,9 @@
 {
   "taxYears": {
-    "2024-25": {
-      "year": "2024-25",
-      "effectiveFrom": "2024-07-01",
-      "effectiveTo": "2025-06-30",
+    "2025-26": {
+      "year": "2025-26",
+      "effectiveFrom": "2025-07-01",
+      "effectiveTo": "2026-06-30",
       "brackets": [
         {
           "min": 0,
@@ -15,29 +15,29 @@
         {
           "min": 18201,
           "max": 45000,
-          "rate": 0.19,
+          "rate": 0.16,
           "fixedAmount": 0,
-          "description": "19% tax rate"
+          "description": "16% tax rate"
         },
         {
           "min": 45001,
-          "max": 120000,
-          "rate": 0.325,
-          "fixedAmount": 5092,
-          "description": "32.5% tax rate"
+          "max": 135000,
+          "rate": 0.30,
+          "fixedAmount": 4288,
+          "description": "30% tax rate"
         },
         {
-          "min": 120001,
-          "max": 180000,
+          "min": 135001,
+          "max": 190000,
           "rate": 0.37,
-          "fixedAmount": 29467,
+          "fixedAmount": 31288,
           "description": "37% tax rate"
         },
         {
-          "min": 180001,
+          "min": 190001,
           "max": null,
           "rate": 0.45,
-          "fixedAmount": 51667,
+          "fixedAmount": 51638,
           "description": "45% tax rate"
         }
       ],
@@ -49,15 +49,15 @@
         },
         "rates": [0.01, 0.0125, 0.015]
       },
-      "lastUpdated": "2024-07-01T00:00:00Z",
+      "lastUpdated": "2025-06-23T00:00:00Z",
       "source": "Australian Taxation Office",
-      "sourceUrl": "https://www.ato.gov.au/rates-and-thresholds"
+      "sourceUrl": "https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents"
     }
-  },
-  "meta": {
-    "version": "1.0.0",
-    "lastModified": "2024-12-23T00:00:00Z",
+  },  "meta": {
+    "version": "2.0.0",
+    "lastModified": "2025-06-23T00:00:00Z",
     "updateInstructions": "Update this file annually after federal budget or ATO rate announcements",
-    "maintainer": "Capital Gains Calculator App"
+    "maintainer": "Capital Gains Calculator App",
+    "notes": "Using 2025-26 tax brackets as current rates from ATO website."
   }
 }

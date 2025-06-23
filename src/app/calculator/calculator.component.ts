@@ -15,6 +15,44 @@ interface CalculationResults {
   taxWithoutCG?: number;
   taxWithCG?: number;
   totalTaxIncrease?: number;
+  // Spouse-related calculations
+  hasSpouse?: boolean;
+  spouseIncome?: number;
+  spouseTaxWithoutCG?: number;
+  spouseTaxWithCG?: number;
+  spouseAdditionalTax?: number;
+  combinedTaxWithoutCG?: number;
+  combinedTaxWithCG?: number;
+  combinedAdditionalTax?: number;
+  // Add detailed explanations
+  explanations?: {
+    step1: string;
+    step2: string;
+    step3: string;
+    step4: string;
+    taxCalculation: string;
+    effectiveTaxRate: number;
+    marginalTaxRate: number;
+    taxBreakdown?: string;
+    medicareLevy?: number;
+    incomeTax?: number;
+    spouseCalculation?: string;
+    combinedCalculation?: string;
+    bracketByBracketCalculation?: Array<{
+      bracket: string;
+      taxableAmount: number;
+      rate: number;
+      taxOwed: number;
+      explanation: string;
+    }>;
+    spouseBracketByBracketCalculation?: Array<{
+      bracket: string;
+      taxableAmount: number;
+      rate: number;
+      taxOwed: number;
+      explanation: string;
+    }>;
+  };
 }
 
 // Keep local interface for backward compatibility
@@ -34,8 +72,10 @@ export class CalculatorComponent implements OnInit {
   calculatorForm: FormGroup;
   results: CalculationResults | null = null;
   showResults = false;
+  showDetailedCalculations = false; // Property to control collapsible state
   currentTaxYear: string;
   taxBracketsLastUpdated: string;
+
 
   // Get tax brackets from service
   private taxBrackets: TaxBracket[] = [];
@@ -43,12 +83,12 @@ export class CalculatorComponent implements OnInit {
   constructor(private fb: FormBuilder) {
     this.currentTaxYear = TaxBracketService.getCurrentTaxYear();
     this.taxBracketsLastUpdated = TaxBracketService.getLastUpdated();
-    this.taxBrackets = TaxBracketService.getTaxBrackets();
-    
-    this.calculatorForm = this.fb.group({
+    this.taxBrackets = TaxBracketService.getTaxBrackets();      this.calculatorForm = this.fb.group({
       salePrice: ['1000000', [Validators.required, Validators.min(0)]],
       buyPrice: ['500000', [Validators.required, Validators.min(0)]],
-      currentIncome: ['0', [Validators.min(0)]]
+      currentIncome: ['0', [Validators.min(0)]],
+      hasSpouse: [true],
+      spouseIncome: ['0', [Validators.min(0)]]
     });
   }  ngOnInit() {
     // Try to fetch latest tax brackets on component load
@@ -78,23 +118,21 @@ export class CalculatorComponent implements OnInit {
       }
     } catch (error) {
       console.warn('Using fallback tax brackets:', error);
-    }  }
-
-  private calculateCapitalGains() {
+    }  }  private calculateCapitalGains() {
     const salePrice = Number(this.calculatorForm.get('salePrice')?.value);
     const buyPrice = Number(this.calculatorForm.get('buyPrice')?.value);
     const currentIncome = Number(this.calculatorForm.get('currentIncome')?.value || 0);
+    const hasSpouse = this.calculatorForm.get('hasSpouse')?.value || false;
+    const spouseIncome = Number(this.calculatorForm.get('spouseIncome')?.value || 0);
 
     // Step 1: Calculate capital gain/loss
     const capitalGain = salePrice - buyPrice;
 
     // Step 2: Apply 50% CGT discount (only for gains, not losses)
-    const capitalGainAfterDiscount = capitalGain > 0 ? capitalGain * 0.5 : capitalGain;
+    const capitalGainAfterDiscount = capitalGain > 0 ? capitalGain * 0.5 : capitalGain;    // Step 3: Apply ownership split (only if there's a spouse)
+    const spouseShare = hasSpouse ? capitalGainAfterDiscount * 0.5 : capitalGainAfterDiscount;
 
-    // Step 3: Apply 50% spouse ownership split
-    const spouseShare = capitalGainAfterDiscount * 0.5;
-
-    // Step 4: Total capital gains bill (assuming this is what each spouse owes)
+    // Step 4: Total capital gains bill (what the person owes)
     const totalCapitalGainsBill = spouseShare;
 
     // Step 5: Calculate estimated tax based on different income levels
@@ -105,7 +143,64 @@ export class CalculatorComponent implements OnInit {
     const currentTaxWithCG = this.calculateTax(currentIncome + Math.max(0, totalCapitalGainsBill));
     const actualAdditionalTax = currentTaxWithCG - currentTaxWithoutCG;
 
-    this.results = {
+    // Spouse calculations (if applicable)
+    let spouseTaxWithoutCG = 0;
+    let spouseTaxWithCG = 0;
+    let spouseAdditionalTax = 0;
+    let spouseTaxBreakdownResult: any = null;
+    let combinedTaxWithoutCG = 0;
+    let combinedTaxWithCG = 0;
+    let combinedAdditionalTax = 0;
+
+    if (hasSpouse) {
+      spouseTaxWithoutCG = this.calculateTax(spouseIncome);
+      spouseTaxWithCG = this.calculateTax(spouseIncome + Math.max(0, totalCapitalGainsBill));
+      spouseAdditionalTax = spouseTaxWithCG - spouseTaxWithoutCG;
+      
+      const spouseTotalIncomeForTax = spouseIncome + Math.max(0, totalCapitalGainsBill);
+      spouseTaxBreakdownResult = this.calculateTaxWithBreakdown(spouseTotalIncomeForTax);
+      
+      combinedTaxWithoutCG = currentTaxWithoutCG + spouseTaxWithoutCG;
+      combinedTaxWithCG = currentTaxWithCG + spouseTaxWithCG;
+      combinedAdditionalTax = actualAdditionalTax + spouseAdditionalTax;
+    }
+
+    // Get detailed tax breakdown for the total income (income + capital gains)
+    const totalIncomeForTax = currentIncome + Math.max(0, totalCapitalGainsBill);
+    const taxBreakdownResult = this.calculateTaxWithBreakdown(totalIncomeForTax);
+
+    // Calculate effective and marginal tax rates
+    const effectiveTaxRate = currentIncome > 0 ? (currentTaxWithoutCG / currentIncome) * 100 : 0;
+    const marginalTaxRate = this.getMarginalTaxRate(totalIncomeForTax);
+
+    // Generate detailed explanations
+    const explanations = {
+      step1: `Capital Gain = Sale Price - Purchase Price = ${this.formatCurrency(salePrice)} - ${this.formatCurrency(buyPrice)} = ${this.formatCurrency(capitalGain)}`,
+      step2: capitalGain > 0 
+        ? `CGT Discount Applied = ${this.formatCurrency(capitalGain)} × 50% = ${this.formatCurrency(capitalGainAfterDiscount)} (50% discount for assets held over 12 months)`
+        : `No CGT discount applied to capital losses. Loss remains ${this.formatCurrency(capitalGain)}`,      step3: hasSpouse 
+        ? `Spouse Split = ${this.formatCurrency(capitalGainAfterDiscount)} ÷ 2 = ${this.formatCurrency(spouseShare)} (50/50 ownership split)`
+        : `No spouse split applied. Your full share = ${this.formatCurrency(spouseShare)}`,
+      step4: hasSpouse 
+        ? `Taxable Capital Gain per person = ${this.formatCurrency(totalCapitalGainsBill)}`
+        : `Your Taxable Capital Gain = ${this.formatCurrency(totalCapitalGainsBill)}`,
+      taxCalculation: currentIncome > 0 
+        ? `Your tax calculation: ${this.formatCurrency(currentIncome)} (income) + ${this.formatCurrency(Math.max(0, totalCapitalGainsBill))} (capital gain) = ${this.formatCurrency(totalIncomeForTax)} total taxable income`
+        : `Your tax calculation based on capital gain only: ${this.formatCurrency(Math.max(0, totalCapitalGainsBill))} taxable income`,
+      taxBreakdown: `Your total tax on ${this.formatCurrency(totalIncomeForTax)} = ${this.formatCurrency(taxBreakdownResult.totalTax)} (Income tax: ${this.formatCurrency(taxBreakdownResult.incomeTax)} + Medicare Levy: ${this.formatCurrency(taxBreakdownResult.medicareLevy)})${currentIncome > 0 ? ` | Additional tax from capital gain: ${this.formatCurrency(actualAdditionalTax)}` : ''}`,
+      spouseCalculation: hasSpouse 
+        ? `Spouse's tax calculation: ${this.formatCurrency(spouseIncome)} (income) + ${this.formatCurrency(Math.max(0, totalCapitalGainsBill))} (capital gain) = ${this.formatCurrency(spouseIncome + Math.max(0, totalCapitalGainsBill))} total taxable income. Spouse's additional tax: ${this.formatCurrency(spouseAdditionalTax)}`
+        : '',
+      combinedCalculation: hasSpouse 
+        ? `Combined household tax impact: ${this.formatCurrency(combinedTaxWithoutCG)} (without CG) → ${this.formatCurrency(combinedTaxWithCG)} (with CG). Total additional tax: ${this.formatCurrency(combinedAdditionalTax)}`
+        : '',
+      effectiveTaxRate,
+      marginalTaxRate,
+      medicareLevy: taxBreakdownResult.medicareLevy,
+      incomeTax: taxBreakdownResult.incomeTax,
+      bracketByBracketCalculation: taxBreakdownResult.breakdown,
+      spouseBracketByBracketCalculation: spouseTaxBreakdownResult?.breakdown || []
+    };    this.results = {
       capitalGain,
       capitalGainAfterDiscount,
       spouseShare,
@@ -117,15 +212,25 @@ export class CalculatorComponent implements OnInit {
       currentIncome,
       taxWithoutCG: currentTaxWithoutCG,
       taxWithCG: currentTaxWithCG,
-      totalTaxIncrease: currentTaxWithoutCG > 0 ? ((actualAdditionalTax / currentTaxWithoutCG) * 100) : 0
+      totalTaxIncrease: currentTaxWithoutCG > 0 ? ((actualAdditionalTax / currentTaxWithoutCG) * 100) : 0,
+      // Spouse data
+      hasSpouse,
+      spouseIncome,
+      spouseTaxWithoutCG,
+      spouseTaxWithCG,
+      spouseAdditionalTax,
+      combinedTaxWithoutCG,
+      combinedTaxWithCG,
+      combinedAdditionalTax,
+      explanations
     };
   }
-
   private calculateTax(income: number): number {
     if (income <= 0) return 0;
     
     let tax = 0;
     
+    // Calculate income tax
     for (const bracket of this.taxBrackets) {
       if (income > bracket.min) {
         const taxableInThisBracket = Math.min(income, bracket.max) - bracket.min + 1;
@@ -135,13 +240,125 @@ export class CalculatorComponent implements OnInit {
       if (income <= bracket.max) break;
     }
     
-    return Math.max(0, tax);
+    // Add Medicare Levy (2% for income above Medicare Levy threshold)
+    const medicareLevy = this.calculateMedicareLevy(income);
+    
+    return Math.max(0, tax + medicareLevy);
   }
 
+  private calculateMedicareLevy(income: number): number {
+    // Medicare Levy threshold for 2025-26: $26,000 for singles
+    const medicareThreshold = 26000;
+    
+    if (income <= medicareThreshold) {
+      return 0;
+    }
+    
+    // Medicare Levy is 2% of total income above threshold
+    const medicareRate = TaxBracketService.getMedicareLevy();
+    return income * medicareRate;
+  }
+  private calculateTaxWithBreakdown(income: number): {
+    totalTax: number;
+    incomeTax: number;
+    medicareLevy: number;
+    breakdown: Array<{
+      bracket: string;
+      taxableAmount: number;
+      rate: number;
+      taxOwed: number;
+      explanation: string;
+    }>;
+  } {
+    if (income <= 0) return { totalTax: 0, incomeTax: 0, medicareLevy: 0, breakdown: [] };
+    
+    let incomeTax = 0;
+    const breakdown: Array<{
+      bracket: string;
+      taxableAmount: number;
+      rate: number;
+      taxOwed: number;
+      explanation: string;
+    }> = [];
+    
+    // Calculate income tax brackets
+    for (const bracket of this.taxBrackets) {
+      if (income > bracket.min) {
+        const maxInThisBracket = bracket.max === Infinity ? income : Math.min(income, bracket.max);
+        const taxableInThisBracket = maxInThisBracket - bracket.min + 1;
+        const taxInThisBracket = taxableInThisBracket * bracket.rate;
+        
+        if (taxableInThisBracket > 0) {
+          breakdown.push({
+            bracket: bracket.max === Infinity 
+              ? `$${bracket.min.toLocaleString()}+` 
+              : `$${bracket.min.toLocaleString()} - $${bracket.max.toLocaleString()}`,
+            taxableAmount: taxableInThisBracket,
+            rate: bracket.rate * 100,
+            taxOwed: bracket.fixedAmount + taxInThisBracket,
+            explanation: bracket.fixedAmount > 0 
+              ? `$${bracket.fixedAmount.toLocaleString()} (fixed) + ($${taxableInThisBracket.toLocaleString()} × ${(bracket.rate * 100).toFixed(1)}%) = $${(bracket.fixedAmount + taxInThisBracket).toLocaleString()}`
+              : `$${taxableInThisBracket.toLocaleString()} × ${(bracket.rate * 100).toFixed(1)}% = $${taxInThisBracket.toLocaleString()}`
+          });
+          
+          incomeTax = bracket.fixedAmount + taxInThisBracket;
+        }
+      }
+      
+      if (income <= bracket.max) break;
+    }
+    
+    // Calculate Medicare Levy
+    const medicareLevy = this.calculateMedicareLevy(income);
+    
+    // Add Medicare Levy to breakdown if applicable
+    if (medicareLevy > 0) {
+      const medicareRate = TaxBracketService.getMedicareLevy() * 100;
+      breakdown.push({
+        bracket: 'Medicare Levy',
+        taxableAmount: income,
+        rate: medicareRate,
+        taxOwed: medicareLevy,
+        explanation: `$${income.toLocaleString()} × ${medicareRate}% = $${medicareLevy.toLocaleString()}`
+      });
+    }
+    
+    return { 
+      totalTax: Math.max(0, incomeTax + medicareLevy), 
+      incomeTax: Math.max(0, incomeTax),
+      medicareLevy: medicareLevy,
+      breakdown 
+    };
+  }
+
+  private getMarginalTaxRate(income: number): number {
+    if (income <= 0) return 0;
+    
+    for (const bracket of this.taxBrackets) {
+      if (income >= bracket.min && (bracket.max === Infinity || income <= bracket.max)) {
+        return bracket.rate * 100; // Convert to percentage
+      }
+    }
+    
+    return 0;
+  }
   reset() {
-    this.calculatorForm.reset();
-    this.results = null;
-    this.showResults = false;
+    // Reset form to default values instead of clearing
+    this.calculatorForm.reset({
+      salePrice: '1000000',
+      buyPrice: '500000',
+      currentIncome: '0',
+      hasSpouse: true,
+      spouseIncome: '0'
+    });
+    
+    // Recalculate with default values
+    this.calculateCapitalGains();
+    this.showResults = true;
+  }
+
+  toggleDetailedCalculations() {
+    this.showDetailedCalculations = !this.showDetailedCalculations;
   }
 
   formatCurrency(amount: number): string {

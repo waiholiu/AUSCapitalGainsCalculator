@@ -13,30 +13,17 @@ export interface TaxYear {
 }
 
 export const TAX_DATA: { [key: string]: TaxYear } = {
-  '2024-25': {
-    year: '2024-25',
-    brackets: [
-      { min: 0, max: 18200, rate: 0, fixedAmount: 0 },
-      { min: 18201, max: 45000, rate: 0.19, fixedAmount: 0 },
-      { min: 45001, max: 120000, rate: 0.325, fixedAmount: 5092 },
-      { min: 120001, max: 180000, rate: 0.37, fixedAmount: 29467 },
-      { min: 180001, max: Infinity, rate: 0.45, fixedAmount: 51667 }
-    ],
-    medicareLevy: 0.02,
-    lastUpdated: '2024-07-01'
-  },
   '2025-26': {
     year: '2025-26',
     brackets: [
-      // These will be updated when announced
       { min: 0, max: 18200, rate: 0, fixedAmount: 0 },
-      { min: 18201, max: 45000, rate: 0.19, fixedAmount: 0 },
-      { min: 45001, max: 120000, rate: 0.325, fixedAmount: 5092 },
-      { min: 120001, max: 180000, rate: 0.37, fixedAmount: 29467 },
-      { min: 180001, max: Infinity, rate: 0.45, fixedAmount: 51667 }
+      { min: 18201, max: 45000, rate: 0.16, fixedAmount: 0 },
+      { min: 45001, max: 135000, rate: 0.30, fixedAmount: 4288 },
+      { min: 135001, max: 190000, rate: 0.37, fixedAmount: 31288 },
+      { min: 190001, max: Infinity, rate: 0.45, fixedAmount: 51638 }
     ],
     medicareLevy: 0.02,
-    lastUpdated: '2024-07-01'
+    lastUpdated: '2025-06-23'
   }
 };
 
@@ -53,10 +40,9 @@ export class TaxBracketService {
       return `${year - 1}-${year.toString().slice(-2)}`;
     }
   }
-  
-  static getTaxBrackets(year?: string): TaxBracket[] {
+    static getTaxBrackets(year?: string): TaxBracket[] {
     const taxYear = year || this.getCurrentTaxYear();
-    return TAX_DATA[taxYear]?.brackets || TAX_DATA['2024-25'].brackets;
+    return TAX_DATA[taxYear]?.brackets || TAX_DATA['2025-26'].brackets;
   }
   
   static getMedicareLevy(year?: string): number {
