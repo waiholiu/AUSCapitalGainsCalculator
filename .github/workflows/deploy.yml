@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -14,6 +12,7 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      actions: read
 
     steps:
     - name: Checkout
@@ -29,7 +28,10 @@ jobs:
       run: npm ci
 
     - name: Build Angular app
-      run: npm run build:prod
+      run: |
+        npm run build:prod
+        ls -la dist/
+        ls -la dist/capital-gains-calculator/
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -37,9 +39,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './dist/capital-gains-calculator'
+        path: 'dist/capital-gains-calculator'
 
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-      if: github.ref == 'refs/heads/main'
