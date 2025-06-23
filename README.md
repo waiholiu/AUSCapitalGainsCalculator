@@ -1,56 +1,25 @@
-# Capital Gains Calculator
+# Capital Gains Calculator (Australia)
 
-A modern Angular application that helps users calculate their capital gains tax liability in Australia.
-
-## Features
-
-- **Simple Input Form**: Enter purchase price, sale price, and optionally your current income
-- **Automatic Calculations**: 
-  - Calculate capital gain/loss
-  - Apply 50% CGT discount (for gains only)
-  - Split ownership 50/50 between spouses
-  - Calculate final tax liability
-- **Tax Estimation**: 
-  - Personalized tax calculation based on your current income
-  - Alternative scenarios for different income levels
-  - Uses current Australian tax brackets (2024-25)
-- **Australian Tax Rules**: Built specifically for Australian tax regulations
-- **Modern UI**: Beautiful, responsive design with gradient backgrounds
-- **Input Validation**: Form validation to ensure accurate calculations
-- **Detailed Results**: Clear breakdown of all calculation steps and tax implications
+An Angular application that helps users calculate their capital gains tax liability specifically for Australian tax regulations.
 
 ## How It Works
 
-1. **Enter Purchase Price**: The amount you originally paid for the asset
-2. **Enter Sale Price**: The amount you sold the asset for
-3. **Enter Current Income (Optional)**: Your annual taxable income for personalized tax calculation
-4. **Calculate**: The app automatically applies:
-   - Capital gains/loss calculation (Sale Price - Purchase Price)
-   - 50% CGT discount (applied only to gains, not losses)
-   - 50% ownership split between spouses
-   - **NEW:** Actual income tax calculation on the capital gains amount
-   - Final taxable amount and estimated tax payable
+Enter your property purchase and sale details, along with your income and that of your spouse (if applicable). The calculator will:
+1. Calculate the capital gain from the sale of the property.
+2. Apply the 50% Capital Gains Tax (CGT) discount for assets held over 12 months.
+3. Estimate the additional tax burden based on your income and your spouse's income.
+4. Provide a shareable URL that retains all your input values for easy sharing and future reference.
+5. Display a detailed breakdown of the tax impact, including individual and combined analyses for you and your spouse.
+6. Show clear indicators of tax increases and additional amounts owed.
 
-## Tax Calculation Features
+## Installation & Development
 
-- **Personalized Tax Estimates**: Enter your current income to get accurate tax calculations
-- **Alternative Scenarios**: See tax implications for different income levels
-- **Current Tax Brackets**: Uses 2024-25 Australian income tax brackets
-- **Additional Tax Only**: Shows the extra tax you'll pay due to capital gains
-- **Medicare Levy Note**: Reminds you about the additional 2% Medicare levy
-
-## Example Calculation:
-- **Purchase Price:** $100,000
-- **Sale Price:** $200,000  
-- **Current Income:** $80,000
-- **Capital Gain:** $100,000
-- **After 50% CGT Discount:** $50,000
-- **Your Share (50% ownership):** $25,000
-- **Additional Tax Payable:** ~$8,125 (32.5% tax bracket)
-
-## Installation
-
-1. Clone this repository
+### Quick Start
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/waiholiu/AUSCapitalGainsCalculator.git
+   cd AUSCapitalGainsCalculator
+   ```
 2. Install dependencies:
    ```bash
    npm install
@@ -61,44 +30,50 @@ A modern Angular application that helps users calculate their capital gains tax 
    ```
 4. Open your browser to `http://localhost:4200`
 
-## Development
+### Production Build
+```bash
+npm run build:prod
+```
 
-This project was built with Angular 17 and includes:
-- Reactive Forms for input validation
-- Modern CSS with gradients and animations
-- Responsive design for mobile and desktop
-- TypeScript for type safety
+### Deploy to GitHub Pages
+```bash
+npm run deploy
+```
 
 ## Scripts
 
 - `npm start` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production  
+- `npm run build:prod` - Build for production with GitHub Pages base href
+- `npm run deploy` - Build and deploy to GitHub Pages
 - `npm test` - Run unit tests
 - `npm run watch` - Build in watch mode
+
+## Live Demo
+
+🌐 **[Try the Calculator Live](https://waiholiu.github.io/AUSCapitalGainsCalculator/)**
+
+## Technology Stack
+
+This project was built with:
+- **Angular 17** - Modern web framework
+- **TypeScript** - Type-safe JavaScript
+- **Reactive Forms** - Input validation and form handling
+- **Angular Router** - URL parameter management for sharing
+- **CSS3** - Modern styling with gradients and animations
+- **GitHub Actions** - Automated deployment to GitHub Pages
 
 ## Tax Disclaimer
 
 This calculator provides simplified calculations based on general Australian tax rules:
-- 50% CGT discount for assets held over 12 months
-- 50/50 ownership split between spouses
-- Basic capital gains calculation
+- 50% CGT discount for assets held over 12 months by Australian tax residents
+- 50/50 ownership split assumed between spouses (adjust manually if different)
+- Uses 2025-26 Australian income tax brackets and Medicare levy rates
+- Calculations include income tax and Medicare levy (2%)
+- Does not account for Medicare Levy Surcharge, HECS/HELP debts, or other levies
 
-**Important**: This is for educational purposes only. Always consult a qualified tax professional for accurate tax advice specific to your situation.
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+**Important**: This is for educational and estimation purposes only. Tax laws are complex and individual circumstances vary. Always consult a qualified tax professional or accountant for accurate tax advice specific to your situation.
 
 ## License
 
-MIT License - feel free to use this code for your own projects.
+MIT License - feel free to use this code for your own projects. See [LICENSE](LICENSE) file for details.
