@@ -1,0 +1,63 @@
+{
+  "taxYears": {
+    "2025-26": {
+      "year": "2025-26",
+      "effectiveFrom": "2025-07-01",
+      "effectiveTo": "2026-06-30",
+      "brackets": [
+        {
+          "min": 0,
+          "max": 18200,
+          "rate": 0,
+          "fixedAmount": 0,
+          "description": "Tax-free threshold"
+        },
+        {
+          "min": 18201,
+          "max": 45000,
+          "rate": 0.16,
+          "fixedAmount": 0,
+          "description": "16% tax rate"
+        },
+        {
+          "min": 45001,
+          "max": 135000,
+          "rate": 0.30,
+          "fixedAmount": 4288,
+          "description": "30% tax rate"
+        },
+        {
+          "min": 135001,
+          "max": 190000,
+          "rate": 0.37,
+          "fixedAmount": 31288,
+          "description": "37% tax rate"
+        },
+        {
+          "min": 190001,
+          "max": null,
+          "rate": 0.45,
+          "fixedAmount": 51638,
+          "description": "45% tax rate"
+        }
+      ],
+      "medicareLevy": 0.02,
+      "medicareLevySurcharge": {
+        "thresholds": {
+          "single": 93000,
+          "family": 186000
+        },
+        "rates": [0.01, 0.0125, 0.015]
+      },
+      "lastUpdated": "2025-06-23T00:00:00Z",
+      "source": "Australian Taxation Office",
+      "sourceUrl": "https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents"
+    }
+  },  "meta": {
+    "version": "2.0.0",
+    "lastModified": "2025-06-23T00:00:00Z",
+    "updateInstructions": "Update this file annually after federal budget or ATO rate announcements",
+    "maintainer": "Capital Gains Calculator App",
+    "notes": "Using 2025-26 tax brackets as current rates from ATO website."
+  }
+}
