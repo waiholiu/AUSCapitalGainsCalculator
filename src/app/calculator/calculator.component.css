@@ -629,11 +629,40 @@ h3 {
 }
 
 .total-impact {
-  background: #f8f9fa;
-  padding: 12px 15px !important;
-  margin: 10px -15px -15px -15px;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  padding: 15px 20px !important;
+  margin: 15px -15px -15px -15px;
   border-radius: 0 0 8px 8px;
-  border-top: 2px solid #4caf50;
+  border-top: 3px solid #dc3545;
+  border-left: 3px solid #dc3545;
+  border-right: 3px solid #dc3545;
+  border-bottom: 3px solid #dc3545;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+  animation: pulse 2s infinite;
+}
+
+.total-impact .household-label {
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  color: #721c24 !important;
+}
+
+.total-impact .household-value {
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  color: #dc3545 !important;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+  }
 }
 
 .household-label {
@@ -738,4 +767,42 @@ h3 {
     padding: 12px 16px;
     font-size: 14px;
   }
+}
+
+/* Individual Tax Analysis Styling */
+.individual-tax-analysis {
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #e3f2fd;
+  border-radius: 6px;
+  border-left: 4px solid #2196f3;
+}
+
+.individual-tax-analysis h6 {
+  color: #1565c0;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.spouse-calculation h6,
+.combined-calculation h6 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.spouse-calculation h6 {
+  color: #7b1fa2;
+}
+
+.combined-calculation h6 {
+  color: #2e7d32;
+}
+
+.tax-rate-info h6 {
+  color: #667eea;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
 }

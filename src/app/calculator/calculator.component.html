@@ -1,5 +1,4 @@
 <div class="card">
-    <h2>Capital Gains Calculator</h2>
     <form [formGroup]="calculatorForm">
         <div class="form-group">
             <label for="buyPrice">Purchase Price (AUD)</label>
@@ -157,29 +156,8 @@
                             <span class="tax-label">Annual Tax:</span>
                             <span class="tax-value highlight-tax">{{ formatCurrency(results.spouseTaxWithCG!) }}</span>
                         </div>
-                    </div>
-                </div>
+                    </div>                </div>
             </div>
-
-            <!-- Combined Household Summary -->
-            <div *ngIf="results.hasSpouse" class="combined-summary">
-                <h5>💑 Combined Household Impact:</h5>
-                <div class="household-totals">
-                    <div class="household-item">
-                        <span class="household-label">Combined Tax (without CG):</span>
-                        <span class="household-value">{{ formatCurrency(results.combinedTaxWithoutCG!) }}</span>
-                    </div>
-                    <div class="household-item">
-                        <span class="household-label">Combined Tax (with CG):</span>
-                        <span class="household-value highlight-tax">{{ formatCurrency(results.combinedTaxWithCG!)
-                            }}</span>
-                    </div>
-                    <div class="household-item total-impact">
-                        <span class="household-label">Total Additional Tax:</span>
-                        <span class="household-value tax-amount">{{ formatCurrency(results.combinedAdditionalTax!)
-                            }}</span>
-                    </div>
-                </div>            </div>
 
             <!-- Individual Tax Impact Summary (always shown) -->
             <div class="tax-impact-summary">
@@ -210,40 +188,34 @@
                 </div>                <div class="result-item" *ngIf="results.spouseTaxWithoutCG! > 0">
                     <span class="result-label">Spouse's Tax Increase Percentage:</span>
                     <span class="result-value percentage">{{ ((results.spouseAdditionalTax! / results.spouseTaxWithoutCG!) * 100).toFixed(1) }}%</span>
-                </div>
-
-                <div class="result-item" *ngIf="results.spouseTaxWithoutCG! === 0">
+                </div>                <div class="result-item" *ngIf="results.spouseTaxWithoutCG! === 0">
                     <span class="result-label">Spouse's Tax Burden:</span>
                     <span class="result-value tax-amount">{{ formatCurrency(results.spouseTaxWithCG!) }} (from $0 to this
                         amount)</span>
                 </div>
             </div>
-        </div>
 
-        <div *ngIf="results.currentIncome === 0" class="zero-income-note">
-            <p><strong>💡 Note:</strong> Since your current income is $0, all tax shown above is purely from capital
-                gains.</p>
-            <p>Try entering different income amounts to see how capital gains interact with regular income tax brackets!
-            </p>
-        </div>
-
-        <div *ngIf="results.currentIncome! > 0" class="alternative-scenarios">
-            <h5>Alternative Income Scenarios:</h5>
-            <div class="mini-scenarios">
-                <div class="mini-scenario">
-                    <span>$30k income:</span>
-                    <span class="tax-amount">{{ formatCurrency(results.estimatedTaxLow) }} extra tax</span>
+            <!-- Combined Household Summary -->
+            <div *ngIf="results.hasSpouse" class="combined-summary">
+                <h5>💑 Combined Household Impact:</h5>
+                <div class="household-totals">
+                    <div class="household-item">
+                        <span class="household-label">Combined Tax (without CG):</span>
+                        <span class="household-value">{{ formatCurrency(results.combinedTaxWithoutCG!) }}</span>
+                    </div>
+                    <div class="household-item">
+                        <span class="household-label">Combined Tax (with CG):</span>
+                        <span class="household-value highlight-tax">{{ formatCurrency(results.combinedTaxWithCG!)
+                            }}</span>
+                    </div>
+                    <div class="household-item total-impact">
+                        <span class="household-label">Total Additional Tax:</span>
+                        <span class="household-value tax-amount">{{ formatCurrency(results.combinedAdditionalTax!)
+                            }}</span>
+                    </div>
                 </div>
-                <div class="mini-scenario">
-                    <span>$80k income:</span>
-                    <span class="tax-amount">{{ formatCurrency(results.estimatedTaxMedium) }} extra tax</span>
-                </div>
-                <div class="mini-scenario">
-                    <span>$150k income:</span>
-                    <span class="tax-amount">{{ formatCurrency(results.estimatedTaxHigh) }} extra tax</span>
-                </div>
-            </div>
-        </div>    </div> 
+            </div>        </div>
+    </div> 
 
     <!-- Collapsible Detailed Calculation Explanations -->
     <div class="calculation-explanations-container" *ngIf="results && results.explanations">
@@ -281,28 +253,37 @@
             <div class="explanation-step">
                 <h5>Step 4: Calculate Your Taxable Amount</h5>
                 <p class="calculation-detail">{{ results.explanations.step4 }}</p>
-            </div><div class="explanation-step" *ngIf="results && results.currentIncome! >= 0">
+            </div>        <div class="explanation-step" *ngIf="results && results.currentIncome! >= 0">
             <h5>Step 5: Tax Impact Analysis</h5>
-            <p class="calculation-detail">{{ results.explanations.taxCalculation }}</p>
-            <p class="calculation-detail">{{ results.explanations.taxBreakdown }}</p>
+            
+            <!-- Your individual tax calculation -->
+            <div class="individual-tax-analysis">
+                <h6>Your Tax Calculation:</h6>
+                <p class="calculation-detail">{{ results.explanations.taxCalculation }}</p>
+                <p class="calculation-detail">{{ results.explanations.taxBreakdown }}</p>
+            </div>
 
-            <!-- Spouse calculations -->
+            <!-- Spouse calculations (only shown if spouse exists) -->
             <div *ngIf="results.hasSpouse && results.explanations.spouseCalculation" class="spouse-calculation">
+                <h6>Spouse's Tax Calculation:</h6>
                 <p class="calculation-detail spouse-detail">{{ results.explanations.spouseCalculation }}</p>
             </div>
 
-            <!-- Combined calculations -->
+            <!-- Combined calculations (only shown if spouse exists) -->
             <div *ngIf="results.hasSpouse && results.explanations.combinedCalculation" class="combined-calculation">
+                <h6>Combined Household Impact:</h6>
                 <p class="calculation-detail combined-detail">{{ results.explanations.combinedCalculation }}</p>
             </div>
 
+            <!-- Tax rate information for the individual -->
             <div class="tax-rate-info" *ngIf="results && results.currentIncome! > 0">
+                <h6>Your Tax Rate Information:</h6>
                 <div class="rate-item">
                     <span>Your Effective Tax Rate:</span>
                     <span class="rate-value">{{ results.explanations.effectiveTaxRate.toFixed(1) }}%</span>
                 </div>
                 <div class="rate-item">
-                    <span>Marginal Tax Rate on Capital Gain:</span>
+                    <span>Your Marginal Tax Rate on Capital Gain:</span>
                     <span class="rate-value">{{ results.explanations.marginalTaxRate.toFixed(1) }}%</span>
                 </div>
             </div>
