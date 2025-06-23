@@ -30,6 +30,16 @@
   background: linear-gradient(135deg, #5a6268 0%, #3d4043 100%);
 }
 
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
 .total {
   background-color: #e3f2fd;
   padding: 15px;

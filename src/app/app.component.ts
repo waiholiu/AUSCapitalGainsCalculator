@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Capital Gains Calculator';
+  title = 'Capital Gains Calculator (Australia)';
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TaxBracketService, TaxBracket as ImportedTaxBracket } from '../services/tax-bracket.service';
 
 interface CalculationResults {
@@ -75,12 +76,16 @@ export class CalculatorComponent implements OnInit {
   showDetailedCalculations = false; // Property to control collapsible state
   currentTaxYear: string;
   taxBracketsLastUpdated: string;
-
+  private isLoadingFromQueryParams = false;
 
   // Get tax brackets from service
   private taxBrackets: TaxBracket[] = [];
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
     this.currentTaxYear = TaxBracketService.getCurrentTaxYear();
     this.taxBracketsLastUpdated = TaxBracketService.getLastUpdated();
     this.taxBrackets = TaxBracketService.getTaxBrackets();      this.calculatorForm = this.fb.group({
@@ -94,7 +99,12 @@ export class CalculatorComponent implements OnInit {
     // Try to fetch latest tax brackets on component load
     this.updateTaxBrackets();
     
-    // Calculate initial results
+    // Load values from query parameters first
+    this.isLoadingFromQueryParams = true;
+    this.loadFromQueryParams();
+    this.isLoadingFromQueryParams = false;
+    
+    // Calculate initial results after loading query params
     this.calculateCapitalGains();
     this.showResults = true;
     
@@ -103,6 +113,9 @@ export class CalculatorComponent implements OnInit {
       if (this.calculatorForm.valid) {
         this.calculateCapitalGains();
         this.showResults = true;
+        if (!this.isLoadingFromQueryParams) {
+          this.updateQueryParams();
+        }
       } else {
         this.showResults = false;
       }
@@ -341,8 +354,7 @@ export class CalculatorComponent implements OnInit {
     }
     
     return 0;
-  }
-  reset() {
+  }  reset() {
     // Reset form to default values instead of clearing
     this.calculatorForm.reset({
       salePrice: '1000000',
@@ -350,6 +362,13 @@ export class CalculatorComponent implements OnInit {
       currentIncome: '0',
       hasSpouse: true,
       spouseIncome: '0'
+    });
+    
+    // Clear query parameters
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
     });
     
     // Recalculate with default values
@@ -381,5 +400,75 @@ export class CalculatorComponent implements OnInit {
 
   getTaxBracketsLastUpdated(): string {
     return this.taxBracketsLastUpdated;
+  }
+  private loadFromQueryParams() {
+    const params = this.route.snapshot.queryParams;
+    
+    // Update form with query parameters if they exist
+    const formValues: any = {};
+    let hasParams = false;
+    
+    if (params['buyPrice'] && !isNaN(Number(params['buyPrice']))) {
+      formValues.buyPrice = params['buyPrice'];
+      hasParams = true;
+    }
+    if (params['salePrice'] && !isNaN(Number(params['salePrice']))) {
+      formValues.salePrice = params['salePrice'];
+      hasParams = true;
+    }
+    if (params['currentIncome'] && !isNaN(Number(params['currentIncome']))) {
+      formValues.currentIncome = params['currentIncome'];
+      hasParams = true;
+    }
+    if (params['hasSpouse'] !== undefined) {
+      formValues.hasSpouse = params['hasSpouse'] === 'true';
+      hasParams = true;
+    }
+    if (params['spouseIncome'] && !isNaN(Number(params['spouseIncome']))) {
+      formValues.spouseIncome = params['spouseIncome'];
+      hasParams = true;
+    }
+    
+    // Only update if we have any valid query parameters
+    if (hasParams) {
+      console.log('Loading from query params:', formValues);
+      this.calculatorForm.patchValue(formValues);
+    }
+  }
+
+  private updateQueryParams() {
+    const formValue = this.calculatorForm.value;
+    
+    const queryParams: any = {
+      buyPrice: formValue.buyPrice,
+      salePrice: formValue.salePrice,
+      currentIncome: formValue.currentIncome,
+      hasSpouse: formValue.hasSpouse,
+      spouseIncome: formValue.spouseIncome
+    };
+    
+    // Update URL without triggering navigation
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParams,
+      replaceUrl: true
+    });
+  }
+
+  copyShareableUrl() {
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      // You could add a toast notification here
+      console.log('URL copied to clipboard');
+      alert('Shareable URL copied to clipboard!');
+    }).catch(err => {
+      console.error('Failed to copy URL: ', err);
+      // Fallback: show the URL in a prompt
+      prompt('Copy this URL to share:', currentUrl);
+    });
+  }
+
+  generateShareableUrl(): string {
+    return window.location.href;
   }
 }
