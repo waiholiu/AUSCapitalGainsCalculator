@@ -933,8 +933,8 @@ h3 {
 
 .bracket-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 15px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
   flex: 1;
   margin-bottom: 10px;
 }
@@ -959,7 +959,7 @@ h3 {
 
 .currency-symbol {
   position: absolute;
-  left: 8px;
+  left: 10px;
   color: #6c757d;
   font-weight: 500;
   z-index: 1;
@@ -967,10 +967,11 @@ h3 {
 
 .currency-input input {
   width: 100%;
-  padding: 8px 8px 8px 20px;
+  padding: 12px 12px 12px 24px;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 15px;
+  min-width: 0;
 }
 
 .currency-input input:focus {
@@ -981,7 +982,7 @@ h3 {
 
 .unlimited {
   position: absolute;
-  right: 8px;
+  right: 10px;
   color: #6c757d;
   font-size: 12px;
   font-style: italic;
@@ -996,10 +997,11 @@ h3 {
 
 .percentage-input input {
   width: 100%;
-  padding: 8px 20px 8px 8px;
+  padding: 12px 24px 12px 12px;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 15px;
+  min-width: 0;
 }
 
 .percentage-input input:focus {
@@ -1010,7 +1012,7 @@ h3 {
 
 .percentage-symbol {
   position: absolute;
-  right: 8px;
+  right: 10px;
   color: #6c757d;
   font-weight: 500;
   pointer-events: none;
@@ -1023,12 +1025,13 @@ h3 {
 
 .description-input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 12px 15px;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 15px;
   color: #495057;
   background: white;
+  min-width: 0;
 }
 
 .description-input:focus {
@@ -1063,7 +1066,7 @@ h3 {
 }
 
 .medicare-field .percentage-input {
-  max-width: 200px;
+  max-width: 300px;
 }
 
 .editor-actions {
@@ -1107,15 +1110,22 @@ h3 {
 }
 
 /* Responsive design for tax bracket editor */
+@media (max-width: 1024px) {
+  .bracket-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+}
+
 @media (max-width: 768px) {
   .bracket-fields {
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   
   .bracket-row {
     flex-direction: column;
-    padding: 12px;
+    padding: 15px;
   }
   
   .bracket-number {
@@ -1137,6 +1147,6 @@ h3 {
 @media (max-width: 480px) {
   .bracket-fields {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 10px;
   }
 }
