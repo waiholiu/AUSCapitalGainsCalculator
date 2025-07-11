@@ -55,6 +55,10 @@
             <button type="button" class="btn btn-secondary" (click)="reset()">
                 Reset Calculator
             </button>
+
+            <button type="button" class="btn btn-info" (click)="toggleTaxBracketEditor()">
+                ⚙️ {{ showTaxBracketEditor ? 'Hide' : 'Customize' }} Tax Brackets
+            </button>
             
             <button type="button" class="btn btn-primary" (click)="copyShareableUrl()">
                 📋 Copy Shareable URL
@@ -65,6 +69,107 @@
             </a>
         </div>
     </form>
+
+    <!-- Tax Bracket Editor -->
+    <div *ngIf="showTaxBracketEditor" class="tax-bracket-editor">
+        <h3>Customize Tax Brackets ({{ getCurrentTaxYear() }})</h3>
+        <p class="editor-intro">⚠️ <strong>Advanced:</strong> Customize the tax brackets and Medicare levy to test different scenarios. Changes only affect this session.</p>
+        
+        <form [formGroup]="taxBracketsForm">
+            <div class="brackets-section">
+                <h4>Tax Brackets</h4>
+                <div class="brackets-list">
+                    <div *ngFor="let bracket of getTaxBracketsFormArray().controls; let i = index" 
+                         class="bracket-row" [formGroup]="$any(bracket)">
+                        <div class="bracket-number">{{ i + 1 }}</div>
+                        <div class="bracket-fields">
+                            <div class="field-group">
+                                <label for="min-{{i}}">From</label>
+                                <div class="currency-input">
+                                    <span class="currency-symbol">$</span>
+                                    <input type="number" 
+                                           id="min-{{i}}" 
+                                           formControlName="min" 
+                                           placeholder="0" 
+                                           [readonly]="i === 0">
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="max-{{i}}">To</label>
+                                <div class="currency-input">
+                                    <span class="currency-symbol">$</span>
+                                    <input type="number" 
+                                           id="max-{{i}}" 
+                                           formControlName="max" 
+                                           placeholder="No limit" 
+                                           [attr.readonly]="i === getTaxBracketsFormArray().length - 1 ? true : null">
+                                    <span *ngIf="i === getTaxBracketsFormArray().length - 1" class="unlimited">No limit</span>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="rate-{{i}}">Tax Rate</label>
+                                <div class="percentage-input">
+                                    <input type="number" 
+                                           id="rate-{{i}}" 
+                                           formControlName="rate" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           max="100" 
+                                           step="0.1">
+                                    <span class="percentage-symbol">%</span>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="fixedAmount-{{i}}">Fixed Amount</label>
+                                <div class="currency-input">
+                                    <span class="currency-symbol">$</span>
+                                    <input type="number" 
+                                           id="fixedAmount-{{i}}" 
+                                           formControlName="fixedAmount" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bracket-description">
+                            <input type="text" 
+                                   formControlName="description" 
+                                   placeholder="Description" 
+                                   class="description-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="medicare-section">
+                <h4>Medicare Levy</h4>
+                <div class="medicare-field">
+                    <label for="medicareLevy">Medicare Levy Rate</label>
+                    <div class="percentage-input">
+                        <input type="number" 
+                               id="medicareLevy" 
+                               formControlName="medicareLevy" 
+                               placeholder="2.0" 
+                               min="0" 
+                               max="10" 
+                               step="0.1">
+                        <span class="percentage-symbol">%</span>
+                    </div>
+                    <small class="help-text">Applied to total income above $26,000 threshold</small>
+                </div>
+            </div>
+
+            <div class="editor-actions">
+                <button type="button" class="btn btn-secondary" (click)="resetTaxBracketsToDefault()">
+                    🔄 Reset to FY{{ getCurrentTaxYear() }} Defaults
+                </button>
+                <button type="button" class="btn btn-warning" (click)="toggleTaxBracketEditor()">
+                    ❌ Close Editor
+                </button>
+            </div>
+        </form>
+    </div>
 
     <div *ngIf="showResults && results" class="results">
         <h3>Calculation Results</h3>

@@ -857,3 +857,286 @@ h3 {
   font-size: 14px;
   font-weight: 600;
 }
+
+/* Tax Bracket Editor Styles */
+.tax-bracket-editor {
+  margin: 25px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  border: 2px solid #667eea;
+  animation: slideDown 0.3s ease-out;
+}
+
+.tax-bracket-editor h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.4em;
+}
+
+.editor-intro {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #856404;
+  font-size: 14px;
+}
+
+.brackets-section {
+  margin-bottom: 25px;
+}
+
+.brackets-section h4 {
+  color: #495057;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.brackets-list {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+}
+
+.bracket-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.bracket-row:last-child {
+  margin-bottom: 0;
+}
+
+.bracket-number {
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 15px;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.bracket-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 15px;
+  flex: 1;
+  margin-bottom: 10px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 5px;
+}
+
+.currency-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 8px;
+  color: #6c757d;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.currency-input input {
+  width: 100%;
+  padding: 8px 8px 8px 20px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.currency-input input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.unlimited {
+  position: absolute;
+  right: 8px;
+  color: #6c757d;
+  font-size: 12px;
+  font-style: italic;
+  pointer-events: none;
+}
+
+.percentage-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.percentage-input input {
+  width: 100%;
+  padding: 8px 20px 8px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.percentage-input input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.percentage-symbol {
+  position: absolute;
+  right: 8px;
+  color: #6c757d;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.bracket-description {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.description-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #495057;
+  background: white;
+}
+
+.description-input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.medicare-section {
+  margin-bottom: 25px;
+}
+
+.medicare-section h4 {
+  color: #495057;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.medicare-field {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.medicare-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+.medicare-field .percentage-input {
+  max-width: 200px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+  transform: translateY(-1px);
+}
+
+/* Responsive design for tax bracket editor */
+@media (max-width: 768px) {
+  .bracket-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .bracket-row {
+    flex-direction: column;
+    padding: 12px;
+  }
+  
+  .bracket-number {
+    margin-right: 0;
+    margin-bottom: 10px;
+    align-self: center;
+  }
+  
+  .editor-actions {
+    flex-direction: column;
+  }
+  
+  .editor-actions .btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .bracket-fields {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
