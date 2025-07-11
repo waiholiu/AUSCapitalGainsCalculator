@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaxBracketService, TaxBracket as ImportedTaxBracket } from '../services/tax-bracket.service';
 
@@ -71,15 +71,19 @@ interface TaxBracket {
 })
 export class CalculatorComponent implements OnInit {
   calculatorForm: FormGroup;
+  taxBracketsForm: FormGroup;
   results: CalculationResults | null = null;
   showResults = false;
   showDetailedCalculations = false; // Property to control collapsible state
+  showTaxBracketEditor = false; // Property to control tax bracket editor visibility
   currentTaxYear: string;
   taxBracketsLastUpdated: string;
   private isLoadingFromQueryParams = false;
 
-  // Get tax brackets from service
-  private taxBrackets: TaxBracket[] = [];
+  // Get tax brackets from service and make them editable
+  private defaultTaxBrackets: TaxBracket[] = [];
+  private currentTaxBrackets: TaxBracket[] = [];
+  private defaultMedicareLevy: number = 0.02;
 
   constructor(
     private fb: FormBuilder,
@@ -88,13 +92,25 @@ export class CalculatorComponent implements OnInit {
   ) {
     this.currentTaxYear = TaxBracketService.getCurrentTaxYear();
     this.taxBracketsLastUpdated = TaxBracketService.getLastUpdated();
-    this.taxBrackets = TaxBracketService.getTaxBrackets();      this.calculatorForm = this.fb.group({
+    this.defaultTaxBrackets = TaxBracketService.getTaxBrackets();
+    this.currentTaxBrackets = [...this.defaultTaxBrackets]; // Create a copy for editing
+    this.defaultMedicareLevy = TaxBracketService.getMedicareLevy();
+
+    this.calculatorForm = this.fb.group({
       salePrice: ['1000000', [Validators.required, Validators.min(0)]],
       buyPrice: ['500000', [Validators.required, Validators.min(0)]],
       currentIncome: ['0', [Validators.min(0)]],
       hasSpouse: [true],
       spouseIncome: ['0', [Validators.min(0)]]
     });
+
+    // Initialize tax brackets form
+    this.taxBracketsForm = this.fb.group({
+      brackets: this.fb.array([]),
+      medicareLevy: [this.defaultMedicareLevy * 100, [Validators.required, Validators.min(0), Validators.max(100)]]
+    });
+    
+    this.initializeTaxBracketsForm();
   }  ngOnInit() {
     // Try to fetch latest tax brackets on component load
     this.updateTaxBrackets();
@@ -122,18 +138,86 @@ export class CalculatorComponent implements OnInit {
         this.showResults = false;
       }
     });
+
+    // Subscribe to tax bracket form changes
+    this.taxBracketsForm.valueChanges.subscribe(() => {
+      if (this.taxBracketsForm.valid) {
+        this.updateCurrentTaxBrackets();
+        this.calculateCapitalGains();
+      }
+    });
+  }
+
+  private initializeTaxBracketsForm() {
+    const bracketsArray = this.taxBracketsForm.get('brackets') as FormArray;
+    bracketsArray.clear();
+    
+    this.defaultTaxBrackets.forEach(bracket => {
+      bracketsArray.push(this.createTaxBracketFormGroup(bracket));
+    });
+  }
+
+  private createTaxBracketFormGroup(bracket: TaxBracket): FormGroup {
+    return this.fb.group({
+      min: [bracket.min, [Validators.required, Validators.min(0)]],
+      max: [bracket.max === Infinity ? null : bracket.max, [Validators.min(0)]],
+      rate: [bracket.rate * 100, [Validators.required, Validators.min(0), Validators.max(100)]],
+      fixedAmount: [bracket.fixedAmount, [Validators.required, Validators.min(0)]],
+      description: [this.getBracketDescription(bracket)]
+    });
+  }
+
+  private getBracketDescription(bracket: TaxBracket): string {
+    if (bracket.rate === 0) return 'Tax-free threshold';
+    if (bracket.max === Infinity) return `${(bracket.rate * 100)}% tax rate`;
+    return `${(bracket.rate * 100)}% tax rate`;
+  }
+
+  private updateCurrentTaxBrackets() {
+    const bracketsArray = this.taxBracketsForm.get('brackets') as FormArray;
+    const medicareLevy = this.taxBracketsForm.get('medicareLevy')?.value / 100 || this.defaultMedicareLevy;
+    
+    this.currentTaxBrackets = bracketsArray.controls.map(control => {
+      const value = control.value;
+      return {
+        min: value.min,
+        max: value.max === null ? Infinity : value.max,
+        rate: value.rate / 100,
+        fixedAmount: value.fixedAmount
+      };
+    });
+  }
+
+  getTaxBracketsFormArray(): FormArray {
+    return this.taxBracketsForm.get('brackets') as FormArray;
+  }
+
+  toggleTaxBracketEditor() {
+    this.showTaxBracketEditor = !this.showTaxBracketEditor;
+  }
+
+  resetTaxBracketsToDefault() {
+    this.currentTaxBrackets = [...this.defaultTaxBrackets];
+    this.initializeTaxBracketsForm();
+    this.taxBracketsForm.patchValue({
+      medicareLevy: this.defaultMedicareLevy * 100
+    });
+    this.calculateCapitalGains();
   }
 
   async updateTaxBrackets() {
     try {
       const latestBrackets = await TaxBracketService.fetchLatestTaxBrackets();
       if (latestBrackets) {
-        this.taxBrackets = latestBrackets;
+        this.defaultTaxBrackets = latestBrackets;
+        this.currentTaxBrackets = [...latestBrackets];
+        this.initializeTaxBracketsForm();
         console.log('Tax brackets updated from external source');
       }
     } catch (error) {
       console.warn('Using fallback tax brackets:', error);
-    }  }  private calculateCapitalGains() {
+    }
+  }  private calculateCapitalGains() {
     const salePrice = Number(this.calculatorForm.get('salePrice')?.value);
     const buyPrice = Number(this.calculatorForm.get('buyPrice')?.value);
     const currentIncome = Number(this.calculatorForm.get('currentIncome')?.value || 0);
@@ -245,8 +329,8 @@ export class CalculatorComponent implements OnInit {
     
     let tax = 0;
     
-    // Calculate income tax
-    for (const bracket of this.taxBrackets) {
+    // Calculate income tax using current (possibly edited) tax brackets
+    for (const bracket of this.currentTaxBrackets) {
       if (income > bracket.min) {
         const taxableInThisBracket = Math.min(income, bracket.max) - bracket.min + 1;
         tax = bracket.fixedAmount + (taxableInThisBracket * bracket.rate);
@@ -255,7 +339,7 @@ export class CalculatorComponent implements OnInit {
       if (income <= bracket.max) break;
     }
     
-    // Add Medicare Levy (2% for income above Medicare Levy threshold)
+    // Add Medicare Levy (using current medicare levy rate)
     const medicareLevy = this.calculateMedicareLevy(income);
     
     return Math.max(0, tax + medicareLevy);
@@ -269,9 +353,14 @@ export class CalculatorComponent implements OnInit {
       return 0;
     }
     
-    // Medicare Levy is 2% of total income above threshold
-    const medicareRate = TaxBracketService.getMedicareLevy();
+    // Use current medicare levy rate (possibly edited)
+    const medicareRate = this.getCurrentMedicareLevy();
     return income * medicareRate;
+  }
+
+  private getCurrentMedicareLevy(): number {
+    const medicareFormValue = this.taxBracketsForm.get('medicareLevy')?.value;
+    return medicareFormValue ? medicareFormValue / 100 : this.defaultMedicareLevy;
   }
   private calculateTaxWithBreakdown(income: number): {
     totalTax: number;
@@ -296,8 +385,8 @@ export class CalculatorComponent implements OnInit {
       explanation: string;
     }> = [];
     
-    // Calculate income tax brackets
-    for (const bracket of this.taxBrackets) {
+    // Calculate income tax brackets using current (possibly edited) tax brackets
+    for (const bracket of this.currentTaxBrackets) {
       if (income > bracket.min) {
         const maxInThisBracket = bracket.max === Infinity ? income : Math.min(income, bracket.max);
         const taxableInThisBracket = maxInThisBracket - bracket.min + 1;
@@ -328,7 +417,7 @@ export class CalculatorComponent implements OnInit {
     
     // Add Medicare Levy to breakdown if applicable
     if (medicareLevy > 0) {
-      const medicareRate = TaxBracketService.getMedicareLevy() * 100;
+      const medicareRate = this.getCurrentMedicareLevy() * 100;
       breakdown.push({
         bracket: 'Medicare Levy',
         taxableAmount: income,
@@ -349,7 +438,7 @@ export class CalculatorComponent implements OnInit {
   private getMarginalTaxRate(income: number): number {
     if (income <= 0) return 0;
     
-    for (const bracket of this.taxBrackets) {
+    for (const bracket of this.currentTaxBrackets) {
       if (income >= bracket.min && (bracket.max === Infinity || income <= bracket.max)) {
         return bracket.rate * 100; // Convert to percentage
       }
